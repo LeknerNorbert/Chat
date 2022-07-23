@@ -137,7 +137,7 @@ namespace Chat.Controllers
         [HttpPost, Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult AcceptFriendRequest(int Id)
+        public IActionResult AcceptFriendRequest([FromBody] int Id)
         {
             // Kiolvassa a tokenből a barát kérés címzettjének a felhasználónevét
             string receiverUsername = User.Claims.FirstOrDefault(c => c.Type == "Username").Value;
@@ -157,7 +157,7 @@ namespace Chat.Controllers
         [HttpPost, Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult DeclineFriendRequest(int Id)
+        public IActionResult DeclineFriendRequest([FromBody] int Id)
         {
             // Kiolvassa a tokenből a barát kérés címzettjének a felhasználónevét
             string receiverUsername = User.Claims.FirstOrDefault(c => c.Type == "Username").Value;
