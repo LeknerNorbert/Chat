@@ -14,7 +14,7 @@ namespace Chat.Models.DTOs
         public string? Lastname { get; set; }
         public string? Middlename { get; set; }
         [Required]
-        [StringLength(maximumLength: 255, MinimumLength = 1)]
+        [RegularExpression(@"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")]
         public string? Email { get; set; }
         [Required]
         [StringLength(maximumLength: 255, MinimumLength = 1)]

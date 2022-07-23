@@ -5,16 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chat.Service
 {
-    public class FriendsService : IFriendsService
+    public class UsersService : IUsersService
     {
         private readonly ApplicationDbContext _db;
 
-        public FriendsService(ApplicationDbContext db)
+        public UsersService(ApplicationDbContext db)
         {
             _db = db;
         }
 
-        public User GetUser(string username)
+        public User ReadUser(string username)
         {
             User? user = _db.Users
                 .FirstOrDefault(u => u.Username == username);
@@ -27,44 +27,33 @@ namespace Chat.Service
             return user;
         }
 
-        public List<UserDto> SearchUsers(string keyword)
+        public List<UserDto> ReadUsers(string keyword)
         {
+            keyword = keyword.ToLower();
+
             List<UserDto> users = _db.Users
-                .Where(u => u.Username.Contains(keyword) &&
-                            u.Firstname.Contains(keyword) &&
-                            u.Middlename.Contains(keyword) &&
-                            u.Lastname.Contains(keyword) &&
-                            u.Email.Contains(keyword))
+                .Where(u => u.Username.ToLower().Contains(keyword) ||
+                            u.Firstname.ToLower().Contains(keyword) ||
+                            u.Middlename.ToLower().Contains(keyword) ||
+                            u.Lastname.ToLower().Contains(keyword) ||
+                            u.EmailUsername.ToLower().Contains(keyword))
                 .Select(u => new UserDto
                 {
                     Username = u.Username,
                     Firstname = u.Firstname,
                     Lastname = u.Lastname,
                     Middlename = u.Middlename,
-                    Email = u.Email
+                    Email = $"{u.EmailUsername}@{u.EmailHostname}"
                 })
                 .ToList();
 
             return users;
         }
 
-        public FriendRequest GetFriendRequest(string senderUsername, string receiverUsername)
-        {
-            FriendRequest? friendRequest = _db.FriendRequests
-                .FirstOrDefault(f => f.Sender.Username == senderUsername && f.Receiver.Username == receiverUsername);
-
-            if (friendRequest == null)
-            {
-                throw new ArgumentNullException("Friend request does not exist");
-            }
-
-            return friendRequest;
-        }
-
-        public List<FriendRequest> GetFriendRequests(string username)
+        public List<FriendRequest> ReadFriendRequest(string username)
         {
             List<FriendRequest> friendRequests = _db.FriendRequests
-                .Where(f => f.Sender.Username == username && f.Receiver.Username == username)
+                .Where(f => f.Sender.Username == username || f.Receiver.Username == username)
                 .Include(f => f.Sender)
                 .Include(f => f.Receiver)
                 .ToList();
@@ -72,7 +61,29 @@ namespace Chat.Service
             return friendRequests;
         }
 
-        public void SendFriendRequest(string senderUsername, string receiverUsername)
+        public List<FriendRequest> ReadAcceptedFriendRequests(string username)
+        {
+            List<FriendRequest> friendRequests = _db.FriendRequests
+                .Where(f => f.Sender.Username == username || f.Receiver.Username == username && f.Status == RequestStatus.Accepted)
+                .Include(f => f.Sender)
+                .Include(f => f.Receiver)
+                .ToList();
+
+            return friendRequests;
+        }
+
+        // Kiolvassa az adatbázisból azokat a barátkéréseket, amiket a felhasználónak küldtek, de még nem fogadta el őket
+        public List<FriendRequest> ReadSentFriendRequest(string username)
+        {
+            List<FriendRequest> friendRequests = _db.FriendRequests
+                .Where(f => f.Receiver.Username == username && f.Status == RequestStatus.Sent)
+                .Include(f => f.Sender)
+                .ToList();
+
+            return friendRequests;
+        }
+
+        public void CreateFriendRequest(string senderUsername, string receiverUsername)
         {
             User? sender = _db.Users
                 .FirstOrDefault(u => u.Username == senderUsername);
@@ -125,7 +136,7 @@ namespace Chat.Service
             _db.SaveChanges();
         }
 
-        public List<PrivateMessage> GetPrivateMessages(string firstUsername, string secondUsername)
+        public List<PrivateMessage> ReadPrivateMessages(string firstUsername, string secondUsername)
         {
             List<PrivateMessage> privateMessages = _db.PrivateMessages
                 .Where(p => (p.Sender.Username == firstUsername && p.Sender.Username == secondUsername) || 

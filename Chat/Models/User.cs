@@ -15,7 +15,8 @@ namespace Chat.Models
         public string? Middlename { get; set; }
         [Required]
         [StringLength(maximumLength: 255, MinimumLength = 1)]
-        public string? Email { get; set; }
+        public string? EmailUsername { get; set; }
+        public string? EmailHostname { get; set; }
         public byte[]? PasswordHash { get; set; }
         public byte[]? PasswordSalt { get; set; }
     }

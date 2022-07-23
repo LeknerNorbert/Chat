@@ -16,7 +16,7 @@ namespace Chat.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private IAuthService _userService;
+        private readonly IAuthService _userService;
         private readonly IConfiguration _configuration;
 
         public AuthController(IAuthService userService, IConfiguration configuration)
@@ -69,7 +69,8 @@ namespace Chat.Controllers
                 Firstname = user.Firstname,
                 Lastname = user.Lastname,
                 Middlename = user.Middlename,
-                Email = user.Email,
+                EmailUsername = user.Email.Split('@')[0],
+                EmailHostname = user.Email.Split('@')[1],
                 PasswordHash = passwordHash,
                 PasswordSalt = passwordSalt
             };
@@ -89,13 +90,13 @@ namespace Chat.Controllers
         private string CreateToken(User user)
         {
             // Az adatok a felhasználóról, amik szerepelnek majd a visszaküldött tokenben
-            List<Claim> claims = new List<Claim>
+            List<Claim> claims = new()
             {
                 new Claim("Username", user.Username),
                 new Claim("Firstname", user.Firstname),
                 new Claim("Lastname", user.Lastname),
                 new Claim("Middlename", user.Middlename),
-                new Claim("Email", user.Email)
+                new Claim("Email", $"{user.EmailUsername}@{user.EmailHostname}")
             };
 
             // Kulcs, amiből később generáljuk az aláírást
@@ -118,21 +119,17 @@ namespace Chat.Controllers
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-            }
+            using var hmac = new HMACSHA512();
+            passwordSalt = hmac.Key;
+            passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
         }
 
         private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
-            using (var hmac = new HMACSHA512(passwordSalt))
-            {
-                var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+            using var hmac = new HMACSHA512(passwordSalt);
+            var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
 
-                return computedHash.SequenceEqual(passwordHash);
-            }
+            return computedHash.SequenceEqual(passwordHash);
         }
     }
 }   

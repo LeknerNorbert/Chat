@@ -1,5 +1,6 @@
 ﻿using Chat.Logic.Interfaces;
 using Chat.Models;
+using Chat.Models.DTOs;
 
 namespace Chat.Logic
 {

@@ -40,7 +40,10 @@ builder.Services.AddSwaggerGen();
 
 // Dependency injections
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IFriendsService, FriendsService>();
+builder.Services.AddScoped<IUsersService, UsersService>();
+
+// Newtonsoft JSON hozzáadása
+builder.Services.AddControllers().AddNewtonsoftJson();
 
 // Autentikálás hozzáadása a swaggerhez
 builder.Services.AddSwaggerGen(options =>
