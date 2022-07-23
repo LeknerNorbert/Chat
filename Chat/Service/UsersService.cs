@@ -64,7 +64,7 @@ namespace Chat.Service
         public List<FriendRequest> ReadAcceptedFriendRequests(string username)
         {
             List<FriendRequest> friendRequests = _db.FriendRequests
-                .Where(f => f.Sender.Username == username || f.Receiver.Username == username && f.Status == RequestStatus.Accepted)
+                .Where(f => (f.Sender.Username == username || f.Receiver.Username == username) && f.Status == RequestStatus.Accepted)
                 .Include(f => f.Sender)
                 .Include(f => f.Receiver)
                 .ToList();
@@ -111,7 +111,7 @@ namespace Chat.Service
         public void AcceptFriendRequest(int id)
         {
             FriendRequest? friendRequest = _db.FriendRequests
-                .FirstOrDefault(f => f.Id == id);
+                .FirstOrDefault(f => f.Id == id && f.Status == RequestStatus.Sent);
 
             if (friendRequest == null)
             {
@@ -125,7 +125,7 @@ namespace Chat.Service
         public void DeclineFriendRequest(int id)
         {
             FriendRequest? friendRequest = _db.FriendRequests
-                .FirstOrDefault(f => f.Id == id);
+                .FirstOrDefault(f => f.Id == id && f.Status == RequestStatus.Sent);
 
             if (friendRequest == null)
             {
