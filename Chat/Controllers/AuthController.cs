@@ -28,20 +28,20 @@ namespace Chat.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult Login(string username, string password)
+        public IActionResult Login([FromBody] LoginDto loginDetails)
         {
             User user;
 
             try
             {
-                user = _userService.Read(username);
+                user = _userService.Read(loginDetails.Username);
             }
             catch (InvalidOperationException)
             {
                 return BadRequest("User does not exist in database");
             }
 
-            if (!VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
+            if (!VerifyPasswordHash(loginDetails.Password, user.PasswordHash, user.PasswordSalt))
             {
                 return BadRequest("Wrong login details");
             }
@@ -54,12 +54,14 @@ namespace Chat.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult Register(UserDto user)
+        public IActionResult Register([FromBody] UserDto user)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest("User is invalid");
             }
+
+
 
             CreatePasswordHash(user.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
