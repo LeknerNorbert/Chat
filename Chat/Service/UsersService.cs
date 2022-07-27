@@ -30,12 +30,12 @@ namespace Chat.Service
         public List<UserDto> ReadUsers(string keyword)
         {
             keyword = keyword.ToLower();
+            // Remove whitespaces
+            keyword = keyword.Replace(" ", String.Empty);
 
             List<UserDto> users = _db.Users
                 .Where(u => u.Username.ToLower().Contains(keyword) ||
-                            u.Firstname.ToLower().Contains(keyword) ||
-                            u.Middlename.ToLower().Contains(keyword) ||
-                            u.Lastname.ToLower().Contains(keyword) ||
+                            String.Concat(u.Lastname, u.Middlename, u.Firstname).ToLower().Contains(keyword) ||
                             u.EmailUsername.ToLower().Contains(keyword))
                 .Select(u => new UserDto
                 {
