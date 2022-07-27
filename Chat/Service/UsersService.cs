@@ -35,7 +35,7 @@ namespace Chat.Service
 
             List<UserDto> users = _db.Users
                 .Where(u => u.Username.ToLower().Contains(keyword) ||
-                            String.Concat(u.Lastname, u.Middlename, u.Firstname).ToLower().Contains(keyword) ||
+                            String.Concat(u.Lastname, u.Firstname, u.Middlename).ToLower().Contains(keyword) ||
                             u.EmailUsername.ToLower().Contains(keyword))
                 .Select(u => new UserDto
                 {
